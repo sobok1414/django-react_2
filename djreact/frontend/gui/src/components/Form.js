@@ -8,25 +8,24 @@ const FormItem = Form.Item;
 class CustomForm extends React.Component {
 
     handlerFormSubmit = (event, requestType, articleID) => {
-        event.preventDefault();
         const title = event.target.elements.title.value;
         const content = event.target.elements.content.value;
 
         switch( requestType ){
             case 'post':
-                axios.post('http://127.0.0.1:8000/api/', {
+                return axios.post('http://127.0.0.1:8000/api/', {
                     title : title,
                     content : content
                 })
                 .then(res => console.log(res))
-                .catch(err => console.err(error))
+                .catch(error => console.err(error))
             case 'put':
-            axios.post('http://127.0.0.1:8000/api/'+articleID, {
+                return axios.put('http://127.0.0.1:8000/api/'+articleID+'/', {
                     title : title,
                     content : content
                 })
                 .then(res => console.log(res))
-                .catch(err => console.err(error))
+                .catch(error => console.err(error))
         }
 
         console.log(title, content)
@@ -35,7 +34,11 @@ class CustomForm extends React.Component {
     render() {
         return (
             <div>
-                <Form onSubmit={this.handlerFormSubmit}>
+                <Form onSubmit={(event) => this.handlerFormSubmit(
+                    event,
+                    this.props.requestType,
+                    this.props.articleID
+                )}>
                     <FormItem label="Title">
                         <Input name="title" placeholder="Put a title here" />
                     </FormItem>
@@ -43,7 +46,7 @@ class CustomForm extends React.Component {
                         <Input name="content" placeholder="Enter some content" />
                     </FormItem>
                     <FormItem >
-                        <Button type="primary" htmlType="submit">Submit</Button>
+                        <Button type="primary" htmlType="submit">{this.props.btnText}</Button>
                     </FormItem>
                 </Form>
             </div>
