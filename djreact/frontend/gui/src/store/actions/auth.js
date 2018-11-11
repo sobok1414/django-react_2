@@ -52,5 +52,48 @@ export const authLogin = (username, password) => {
             dispatch(authSuccess(token));
             dispatch(checkAuthTimeout(3600));
         })
+        .catch(error => {
+            dispatch(authFail(error))
+        })
+    }
+}
+
+export const authRegister = (username, email ,password, password2) => {
+    return dispatch => {
+        dispatch(authStart());
+        axios.post('http://127.0.0.1:8000/rest-auth/registertaion', {
+            username: username,
+            email: email,
+            password: password,
+            password2: password2
+        })
+        .then(res => {
+            const token = res.data.key;
+            const expirationsDate = new Date(new Date().getTime() + 3600 * 1000);
+            localStorage.setItem('token'. token);
+            localStorage.setItem('expirationsDate', expirationsDate);
+            dispatch(authSuccess(token));
+            dispatch(checkAuthTimeout(3600));
+        })
+        .catch(error => {
+            dispatch(authFail(error))
+        })
+    }
+}
+
+export const authCheckState = () => {
+    return dispatch => {
+        const token = localStorage.getItem('token');
+        if ( token == undefined ){
+            dispatch(logout());
+        } else {
+            const expirationDate = new Date(localStorage.getItem('expirationDate'));
+            if ( expirationDate <= new Date() ) {
+                dispatch(logout());
+            } else {
+                dispatch(authSuccess(token));
+                dispatch(checkAuthTimeout( (expirationDate.getTime() - new Date().getTime()) / 1000) ) 
+            }
+        }
     }
 }
