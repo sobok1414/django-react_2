@@ -1,8 +1,11 @@
-import { Form, Input, Tooltip, Icon, Cascader, Select, Row, Col, Checkbox, Button, AutoComplete } from 'antd';
+import React from 'react';
+import { Form, Input, Icon, Button } from 'antd';
+import { NavLink } from 'react-router-dom';
+import * as actions from '../store/actions/auth';
+import { connect } from 'react-redux';
 
 const FormItem = Form.Item;
-const Option = Select.Option;
-const AutoCompleteOption = AutoComplete.Option;
+
 
 
 class RegistrationForm extends React.Component {
@@ -15,8 +18,14 @@ class RegistrationForm extends React.Component {
         e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
-                console.log('Received values of form: ', values);
+                this.props.onAuth(
+                    values.userName,
+                    values.email,
+                    values.password,
+                    values.confirm,
+                );
             }
+            this.props.history.push('/')
         });
     }
 
@@ -62,7 +71,7 @@ class RegistrationForm extends React.Component {
                             required: true, message: 'Please input your E-mail!',
                         }],
                     })(
-                        <Input prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Email"/>
+                        <Input prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Email" />
                     )}
                 </FormItem>
                 <FormItem>
@@ -73,40 +82,48 @@ class RegistrationForm extends React.Component {
                             validator: this.validateToNextPassword,
                         }],
                     })(
-                        <Input type="password" prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}type="password" placeholder="password"/>
+                        <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="password" />
                     )}
                 </FormItem>
-                 <FormItem
-          {...formItemLayout}
-          label="Confirm Password"
-        >
-          {getFieldDecorator('confirm', {
-            rules: [{
-              required: true, message: 'Please confirm your password!',
-            }, {
-              validator: this.compareToFirstPassword,
-            }],
-          })(
-            <Input type="password" onBlur={this.handleConfirmBlur} />
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="Confirm Password"
-        >
-          {getFieldDecorator('confirm', {
-            rules: [{
-              required: true, message: 'Please confirm your password!',
-            }, {
-              validator: this.compareToFirstPassword,
-            }],
-          })(
-            <Input type="password" onBlur={this.handleConfirmBlur} />
-          )}
-        </FormItem>
+
+                <FormItem>
+                    {getFieldDecorator('confirm', {
+                        rules: [{
+                            required: true, message: 'Please confirm your password!',
+                        }, {
+                            validator: this.compareToFirstPassword,
+                        }],
+                    })(
+                        <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="password" onBlur={this.handleConfirmBlur} />
+                    )}
+                </FormItem>
+                <FormItem>
+                    <Button type="primary" htmlType="submit" style={{ marginRight: '10px' }}>
+                        Sign up
+                    </Button>
+                    Or
+                    <NavLink style={{ marginRight: '10px' }}
+                        to="/login/"> login
+                    </NavLink>
+                </FormItem>
             </Form>
         );
     }
 }
 
 const WrappedRegistrationForm = Form.create()(RegistrationForm);
+
+const mapStateToProps = (state) => {
+    return {
+        loading: state.loading,
+        error: state.error
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onAuth: (username, email, password, password2) => dispatch(actions.authRegister(username, email, password, password2))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(WrappedRegistrationForm)
